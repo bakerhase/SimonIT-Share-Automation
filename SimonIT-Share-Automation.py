@@ -262,7 +262,7 @@ pwrd_label = tk.Label(text='AD Password')
 pwrd_entry = tk.Entry(fg='black', bg='white', show = '*', width = 50)
 
 # Labels and creates URL entry text box
-URL_label = tk.Label(text = 'Enter each class URL on a new line')
+URL_label = tk.Label(text = 'Start each class recording URL on a new line')
 URL_box = tk.Text() #Play with text wrapping. Is it better for no wrapping? Will that be confusing? Will having text wrapping be confusing?
 
 
@@ -285,7 +285,7 @@ submit.pack()
 advisory_label.pack()
 
 # Shows a READ ME box giving info on the state of the app and some disclaimers
-tk.messagebox.showinfo(title = 'READ ME', message = 'Hello! This app is a work in progress.\n\u2022Currently, it autofills the information for sharing zoom course recordings.\n\u2022It DOES NOT ASSIGN the recording to the instructor (though it may in the future).\n\u2022This app throws up NO ERROR MESSAGES if an input is incorrect (e.g. typo in AD Username).\n\u2022It assumes that the email that gets you into echo is of the form ADUsername@u.rochester.edu.\n\u2022It stores no data whatsoever on your AD credentials. This app is entirely open-source, so you may verify this personally if you feel so inclined.\n\u2022If you find any bugs or if the assumption about email format is wrong, please notify Baker either in person or at bhase@u.rochester.edu.\n\u2022Be sure to DOUBLE CHECK any and all auto-filled information. I take no responsibility for any errors in shared class information as a result of usage of this app.')
+tk.messagebox.showinfo(title = 'READ ME', message = 'Hello! This app is a work in progress.\n\u2022Currently, it autofills the information for sharing zoom course recordings.\n\u2022It DOES NOT ASSIGN the recording to the instructor (though it may in the future).\n\u2022This app throws up NO ERROR MESSAGES if an input is incorrect (e.g. typo in AD Username).\n\u2022It assumes that the email that gets you into echo is of the form ADUsername@u.rochester.edu.\n\u2022Be sure to DOUBLE CHECK any and all auto-filled information. I take no responsibility for any errors in shared class information as a result of usage of this app.\n\u2022It stores no data whatsoever on your AD credentials. This app is entirely open-source, so you may verify this personally if you feel so inclined.\n\u2022If you find any bugs or if the assumption about email format is wrong, please notify Baker either in person or at bhase@u.rochester.edu.\n\u2022You can find the source code on my GitHub, github.com/bakerhase')
 window.deiconify() #shows the main app window once the Read Me has been addressed
 
 
