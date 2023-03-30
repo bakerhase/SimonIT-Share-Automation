@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Mar 24 21:54:25 2023
+Created March 2023
 
 @author: Baker Hase
 
@@ -78,6 +78,40 @@ def titleparse(page_title):
     return course_title
 
 
+def assigntoprofessor(driver, course_name):
+    details_button = driver.find_element(By.ID, 'content-tab-details')
+    details_button.click()
+    
+    change_owner_button = driver.find_element(By.ID, 'change-owner-open')
+    change_owner_button.click()
+    
+    owner_dropdown = driver.find_element(By.ID, 'change-owner-select_input')
+    owner_dropdown.click()
+    
+    owner_dropdown_input = driver.find_element(By.ID, 'react-select-4-input')
+    owner_dropdown_input.send_keys('glenn.huels@simon.rochester.edu')
+    
+    #done_button = driver.find_element(By.ID, 'change-owner-done')
+    #done_button.click()
+
+def scrollbarchecker(idstr):
+    truthval = True
+    
+    checklist = []
+    for num in [0,1,2,3,4,5,6,7]:
+        checklist.append('react-select-12-option-'+str(num))
+        checklist.append('react-select-7-option-'+str(num))
+    
+    for idref in checklist:
+        if idstr == idref:
+            truthval = False
+    
+    if truthval:
+        return True
+    else:
+        return False
+            
+
 # Main function which opens and fills information for classes in Google Chrome
 # Passed in a URAD username and password, as well as a list of URLs for the desired classes
 def script(uname, pwrd, urllist):
@@ -137,7 +171,7 @@ def script(uname, pwrd, urllist):
         driver.switch_to.new_window('tab')
         driver.get(URL)
         
-        driver.implicitly_wait(40)
+        #driver.implicitly_wait(40)
         
         title = driver.title
         # Takes course name from title of webpage to later pass into fields
@@ -148,19 +182,19 @@ def script(uname, pwrd, urllist):
         course_number = total_coursename[3:]
     
     
-        driver.implicitly_wait(15)
+        #driver.implicitly_wait(15)
     
         date_elt = driver.find_element(By.ID, 'created-timestamp')
         datestring = date_elt.get_attribute('title')
         date = dateformat(datestring)
     
-    
+        #assigntoprofessor(driver, course_number) ### REMOVE IN THE CASE OF NOT WANTING TO UPKEEP DICTIONARY
     
         #Press the 'Share' button
         share_button = driver.find_element(By.ID,'share-button')
         share_button.click()
     
-        driver.implicitly_wait(150)
+        #driver.implicitly_wait(150)
     
         #Press the 'Class' tab
         class_tab_button = driver.find_element(By.CSS_SELECTOR , "button[id*='share-tabs-tab-2']")
@@ -170,8 +204,9 @@ def script(uname, pwrd, urllist):
         course_type_dropdown = driver.find_element(By.ID, "shareWithClass-courseSelect_input")
         course_type_dropdown.click()
     
-        #course_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-5-input"]''')
-        #course_dropdown_input.send_keys(course_type)
+        #course_dropdown_input = driver.find_element(By.ID, 'react-select-6-input')
+        #course_dropdown_input.send_keys(course_type+':')
+        #course_dropdown_input.send_keys(Keys.RETURN)
     
         course_type_selection = driver.find_element(By.XPATH , "//*[contains(text(),'"+course_type+":"+"')]")
         course_type_selection.click()
@@ -180,7 +215,7 @@ def script(uname, pwrd, urllist):
         term_dropdown = driver.find_element(By.ID,"shareWithClass-termSelect_input")
         term_dropdown.click()
     
-        #term_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-11-input"]''')
+        #term_dropdown_input = driver.find_element(By.ID, "react-select-7-input")
         #term_dropdown_input.send_keys(term)
         #term_dropdown_input.send_keys(Keys.RETURN)
     
@@ -188,21 +223,25 @@ def script(uname, pwrd, urllist):
         term_selection.click()
     
         #Navigates 'Section' dropdown menu
+    
         section_dropdown = driver.find_element(By.ID,"shareWithClass-sectionSelect_input")
         section_dropdown.click()
+        
+        section_selection = driver.find_element(By.XPATH , "//*[text()='"+course_number+"']")
+        section_id = section_selection.get_attribute('id')
+        
+        scroll_bool = scrollbarchecker(section_id)
+        
+        if scroll_bool:
     
-        section_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-7-input"]''')
-        section_dropdown_input.send_keys(course_number)
+            section_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-7-input"]''')
+            section_dropdown_input.send_keys(course_number)
     
-        section_dropdown_input.send_keys(Keys.RETURN)
-    
-        #section_selection = driver.find_element(By.XPATH , "//*[text()='"+course_number+"']")
-        driver.implicitly_wait(400)
-        #elem = driver.switch_to.active_element
-        #elem.click()
-        #driver.execute_script ("arguments[0].click();",section_selection)
-    
-        #section_selection.click()
+            section_dropdown_input.send_keys(Keys.RETURN)
+        else:
+            section_selection.click()
+        
+        
     
         #presses the 'New Class' button
         new_class_tab_button = driver.find_element(By.ID, "shareWithClass-classTabs-tab-new-class")
