@@ -12,12 +12,15 @@ Currently there are no error returns, the script will just not fully function
 # All required packages come with python by default (tkinter) or from selenium
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
+import webdriver_manager
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import tkinter as tk
+import tkinter.messagebox
+#import os
 
 # Takes the first three letter abbreviation of a month and returns a two-digit month as a string
 def monthnum (month):
@@ -68,7 +71,7 @@ def titleparse(page_title):
     flag = 0
     idxadd = -1
     while flag == 0:
-        if page_title[endidx+idxadd] == ' ':
+        if page_title[endidx+idxadd] == ' ' or (endidx+idxadd) == -1:
             flag = 1
         else:
             reverse_title+=page_title[endidx+idxadd]
@@ -130,6 +133,9 @@ def script(uname, pwrd, urllist):
     # Makes it so the window stays open after program execution
     chrome_options = Options()
     chrome_options.add_experimental_option("detach",True)
+    
+    
+    #cwd = os.getcwd()
     
     # Starts webdriver service
     service = ChromeService(executable_path=ChromeDriverManager().install())
