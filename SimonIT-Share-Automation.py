@@ -120,8 +120,13 @@ def script(uname, pwrd, urllist):
     usrname = uname
     passwrd = pwrd
     tgtURL = "https://echo360.org/home"
-    term = 'Spring 2023' # CURRENTLY NEEDS TO BE CHANGED MANUALLY EACH TERM
-
+    ### Commented out parts here are for potential future implementation of a config file
+    #config_file = open('config.txt', 'r')
+    #termline = config_file.readline()
+    #config_file.close()
+    #termidx = termline.index(':')
+    #termstop = termline.index('\n')
+    term = 'Spring 2023'#termline[termidx+1:termstop]
     # Makes it so the window stays open after program execution
     chrome_options = Options()
     chrome_options.add_experimental_option("detach",True)
@@ -161,6 +166,9 @@ def script(uname, pwrd, urllist):
     # While loop prevents the rest of the script from running until properly on the Echo site
     title = driver.title
 
+    # This while loop identifies the Echo dashboard page by the title being 'Home' and no other
+    # page brought up by DUO authentication having 'o' as the second character in the title. If
+    # either system is changed so that this is no longer the case, this block will need to change
     while len(title)<2 or title[1] != 'o': # Length requirement prevents error if title is an empty string
         driver.implicitly_wait(0.5)
         title = driver.title
@@ -168,6 +176,7 @@ def script(uname, pwrd, urllist):
     # Loops over each URL in the given URL list
     for URL in urllist:
         
+        # Makes new tab
         driver.switch_to.new_window('tab')
         driver.get(URL)
         
