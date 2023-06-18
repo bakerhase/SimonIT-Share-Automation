@@ -7,6 +7,16 @@ Created March 2023
 If you have questions or bugs to report, email me at bhase@u.rochester.edu
 
 Currently there are no error returns, the script will just not fully function
+
+There seems to be an issue in which the script will fail to find an element on the page and therefore stop running
+if the user tabs away from Chrome being their active window while the script is running
+
+### This script relies on a configuration file 'config.txt' being present in the folder from which this script runs
+### The first line should give the current term after 'term:' (e.g. 'term:Spring 2023')
+### The second line should be blank
+### The third through second to last lines should be of the form 'coursename:professoremail'
+### The last line should be blank
+### An example can be found on the GitHub page
 """
 
 # All required packages come with python by default (tkinter) or from selenium
@@ -20,7 +30,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 import tkinter as tk
 import tkinter.messagebox
-#import os
+
 
 # Takes the first three letter abbreviation of a month and returns a two-digit month as a string
 def monthnum (month):
@@ -80,40 +90,70 @@ def titleparse(page_title):
     course_title = reverse_title[::-1]
     return course_title
 
-
+# Passed in the webdriver and the course name, searches a config.txt in order to return the email of the professor
+# and assign to the professor in the "Details" tab. Requires a dictionary of professor emails to be maintained each
+# term in order to function. See comment at top of this script for notes on the format of config.txt
 def assigntoprofessor(driver, course_name):
-    details_button = driver.find_element(By.ID, 'content-tab-details')
-    details_button.click()
+    prof_email = ''
+    config_file = open('config.txt', 'r')
+    config_lines = config_file.readlines()
+    for email_line in config_lines[2:]:
+        colon_index = email_line.find(':')
+        line_length = len(email_line)
+        if course_name.upper() == email_line[0:colon_index]:
+            prof_email = email_line[colon_index+1:line_length-1]
     
-    change_owner_button = driver.find_element(By.ID, 'change-owner-open')
-    change_owner_button.click()
+    config_file.close()
     
-    owner_dropdown = driver.find_element(By.ID, 'change-owner-select_input')
-    owner_dropdown.click()
+    # If statement checks to make sure the professor's email has been found. Will not assign if not found
+    # Allows for usage of the script without upkeep of course dictionary in config.txt in case people at the
+    # help desk get lazy (which we are inclined to do)
+    print(prof_email)
+    if prof_email != '':
+        details_button = driver.find_element(By.ID, 'content-tab-details')
+        details_button.click()
     
-    owner_dropdown_input = driver.find_element(By.ID, 'react-select-4-input')
-    owner_dropdown_input.send_keys('glenn.huels@simon.rochester.edu')
+        change_owner_button = driver.find_element(By.ID, 'change-owner-open')
+        change_owner_button.click()
     
-    #done_button = driver.find_element(By.ID, 'change-owner-done')
-    #done_button.click()
+        owner_dropdown = driver.find_element(By.ID, 'change-owner-select_input')
+        owner_dropdown.click()
+    
+        owner_dropdown_input = driver.find_element(By.ID, 'react-select-4-input')
+        owner_dropdown_input.send_keys(prof_email)
+    
+        done_button = driver.find_element(By.ID, 'change-owner-done')
+        done_button.click()
 
+# Checks to see if a dropdown menu has more than 7 entries, at which point it will appear with a scrollbar.
+# With how Echo dropdowns work, you will not be able to type in the entry field if there is not a scrollbar
+# However, clicking on elements will not work when there is a scrollbar if they are not in the visible entries
+# Knowing is there is a scrollbar or not changes the method by which the dropdown entry is selected
 def scrollbarchecker(idstr):
-    truthval = True
+    #truthval = False
     
+    last_dash_index = idstr.rfind('-')
+    number = int(idstr[last_dash_index+1:])
+    if number in [0,1,2,3,4,5,6,7]:
+        return False
+    else:
+        return True
+    """
     checklist = []
     for num in [0,1,2,3,4,5,6,7]:
         checklist.append('react-select-12-option-'+str(num))
         checklist.append('react-select-7-option-'+str(num))
+        checklist.append('react-select-24-option-'+str(num))
     
     for idref in checklist:
         if idstr == idref:
-            truthval = False
+            truthval = True
     
     if truthval:
-        return True
-    else:
         return False
-            
+    else:
+        return True
+    """        
 
 # Main function which opens and fills information for classes in Google Chrome
 # Passed in a URAD username and password, as well as a list of URLs for the desired classes
@@ -123,13 +163,15 @@ def script(uname, pwrd, urllist):
     usrname = uname
     passwrd = pwrd
     tgtURL = "https://echo360.org/home"
-    ### Commented out parts here are for potential future implementation of a config file
-    #config_file = open('config.txt', 'r')
-    #termline = config_file.readline()
-    #config_file.close()
-    #termidx = termline.index(':')
-    #termstop = termline.index('\n')
-    term = 'Spring 2023'#termline[termidx+1:termstop]
+    
+    # Gets term name from config.txt. See comment at the top of the script for notes on format of config.txt
+    config_file = open('config.txt', 'r')
+    termline = config_file.readline()
+    config_file.close()
+    termidx = termline.index(':')
+    termstop = termline.index('\n')
+    term = termline[termidx+1:termstop]
+    
     # Makes it so the window stays open after program execution
     chrome_options = Options()
     chrome_options.add_experimental_option("detach",True)
@@ -150,7 +192,7 @@ def script(uname, pwrd, urllist):
     submit_button.click()
 
 
-    driver.implicitly_wait(0.5)
+    driver.implicitly_wait(3000)
 
 
     # Enters active directory username and password into UR login page
@@ -176,7 +218,6 @@ def script(uname, pwrd, urllist):
     # page brought up by DUO authentication having 'o' as the second character in the title. If
     # either system is changed so that this is no longer the case, this block will need to change
     while len(title)<2 or title[1] != 'o': # Length requirement prevents error if title is an empty string
-        driver.implicitly_wait(0.5)
         title = driver.title
     
     # Loops over each URL in the given URL list
@@ -186,7 +227,6 @@ def script(uname, pwrd, urllist):
         driver.switch_to.new_window('tab')
         driver.get(URL)
         
-        #driver.implicitly_wait(40)
         
         title = driver.title
         # Takes course name from title of webpage to later pass into fields
@@ -197,19 +237,72 @@ def script(uname, pwrd, urllist):
         course_number = total_coursename[3:]
     
     
-        #driver.implicitly_wait(15)
     
         date_elt = driver.find_element(By.ID, 'created-timestamp')
         datestring = date_elt.get_attribute('title')
         date = dateformat(datestring)
+        
+        
+        ### This entire block would be better as a function, I think, but I am not yet aware of how to pass a webdriver
+        # Searches a config.txt in order to return the email of the professor
+        # and assign to the professor in the "Details" tab. Requires a dictionary of professor emails to be maintained
+        # each term in order to function. See comment at top of this script for notes on the format of config.txt
+        prof_email = ''
+        config_file = open('config.txt', 'r')
+        config_lines = config_file.readlines()
+        for email_line in config_lines[2:]:
+            colon_index = email_line.find(':')
+            line_length = len(email_line)
+            if total_coursename.upper() == email_line[0:colon_index]:
+                prof_email = email_line[colon_index+1:line_length-1]
+        config_file.close()
+        # If statement checks to make sure the professor's email has been found in config and checks if "Zoom" is
+        # present in the currently assigned name. These checks allow the script to continue if a) the dictionary of
+        # classes has not been upkept or b) the recording has already been assigned to a professor
+        
+        # Clicks to Details tab
+        details_button = driver.find_element(By.ID, 'content-tab-details')
+        details_button.click()
+        
+        zoom_flag = False #defaults to false just in case
+        
+        default_assignment_field = driver.find_element(By.CSS_SELECTOR, "span.OwnerControls__StyledSpan-uu0jzw-4.hmRsjL")
+        default_assignment = default_assignment_field.get_attribute("title")
+        if "Zoom" in default_assignment:
+            zoom_flag = True
+        elif "zoom" in default_assignment:
+            zoom_flag = True
+        
+        if (prof_email != '') and zoom_flag:
+            # Click change owner button
+            change_owner_button = driver.find_element(By.ID, 'change-owner-open')
+            change_owner_button.click()
+            
+            # Access the dropdown
+            owner_dropdown = driver.find_element(By.ID, 'change-owner-select_input')
+            owner_dropdown.click()
+        
+            # Pass professor email into dropdown field
+            owner_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-4-input"]''')
+            owner_dropdown_input.send_keys(prof_email)
+            
+            #owner_box = driver.find_element(By.CLASS_NAME, "css-1g6gooi")
+            #owner_box.send_keys(Keys.RETURN)
+            #owner_dropdown_input.send_keys(Keys.RETURN)
+            owner_dropdown_item = driver.find_element(By.XPATH , "//*[contains(text(),'<"+prof_email+">')]")
+            owner_dropdown_item.click()
+            
+            # Click done
+            done_button = driver.find_element(By.ID, 'change-owner-done')
+            #owner_dropdown_input.send_keys(Keys.RETURN)
+            #driver.implicitly_wait(300000000)
+            done_button.click()
     
-        #assigntoprofessor(driver, course_number) ### REMOVE IN THE CASE OF NOT WANTING TO UPKEEP DICTIONARY
     
         #Press the 'Share' button
         share_button = driver.find_element(By.ID,'share-button')
         share_button.click()
     
-        #driver.implicitly_wait(150)
     
         #Press the 'Class' tab
         class_tab_button = driver.find_element(By.CSS_SELECTOR , "button[id*='share-tabs-tab-2']")
@@ -223,7 +316,7 @@ def script(uname, pwrd, urllist):
         #course_dropdown_input.send_keys(course_type+':')
         #course_dropdown_input.send_keys(Keys.RETURN)
     
-        course_type_selection = driver.find_element(By.XPATH , "//*[contains(text(),'"+course_type+":"+"')]")
+        course_type_selection = driver.find_element(By.XPATH , "//*[contains(text(),'"+course_type.upper()+":"+"')]")
         course_type_selection.click()
     
         #Navigates 'Term' dropdown menu
@@ -242,7 +335,7 @@ def script(uname, pwrd, urllist):
         section_dropdown = driver.find_element(By.ID,"shareWithClass-sectionSelect_input")
         section_dropdown.click()
         
-        section_selection = driver.find_element(By.XPATH , "//*[text()='"+course_number+"']")
+        section_selection = driver.find_element(By.XPATH , "//*[text()='"+course_number.upper()+"']")
         section_id = section_selection.get_attribute('id')
         
         scroll_bool = scrollbarchecker(section_id)
@@ -250,7 +343,7 @@ def script(uname, pwrd, urllist):
         if scroll_bool:
     
             section_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-7-input"]''')
-            section_dropdown_input.send_keys(course_number)
+            section_dropdown_input.send_keys(course_number.upper())
     
             section_dropdown_input.send_keys(Keys.RETURN)
         else:
@@ -264,7 +357,7 @@ def script(uname, pwrd, urllist):
     
         #Enters recording name into 'Class Name' field
         class_name_field = driver.find_element(By.NAME, "className")
-        class_name_field.send_keys("Zoom."+total_coursename+"-"+date)
+        class_name_field.send_keys("Zoom."+total_coursename.upper()+"-"+date)
     
 
     
@@ -338,8 +431,15 @@ URL_box.pack()
 submit.pack()
 advisory_label.pack()
 
+config_file = open('config.txt', 'r')
+termline = config_file.readline()
+config_file.close()
+termidx = termline.index(':')
+termstop = termline.index('\n')
+term = termline[termidx+1:termstop]
+
 # Shows a READ ME box giving info on the state of the app and some disclaimers
-tk.messagebox.showinfo(title = 'READ ME', message = 'Hello! This app is a work in progress.\n\u2022Currently, it autofills the information for sharing zoom course recordings.\n\u2022It DOES NOT ASSIGN the recording to the instructor (though it may in the future).\n\u2022This app throws up NO ERROR MESSAGES if an input is incorrect (e.g. typo in AD Username).\n\u2022It assumes that the email that gets you into echo is of the form ADUsername@u.rochester.edu.\n\u2022Be sure to DOUBLE CHECK any and all auto-filled information. I take no responsibility for any errors in shared class information as a result of usage of this app.\n\u2022It stores no data whatsoever on your AD credentials. This app is entirely open-source, so you may verify this personally if you feel so inclined.\n\u2022If you find any bugs or if the assumption about email format is wrong, please notify Baker either in person or at bhase@u.rochester.edu.\n\u2022You can find the source code on my GitHub, github.com/bakerhase')
+tk.messagebox.showinfo(title = 'READ ME', message = 'The currently selected term is: '+term+'.\nIf this term is incorrect, please update the "term:" field in the config file.\n\nUPDATE AS OF 5/14/23\n\u2022This script NOW ASSIGNS TO THE PROFESSOR. Please be sure to make sure there are no errors with this assignment.\n\u2022This app throws up NO ERROR MESSAGES if an input is incorrect (e.g. typo in AD Username).\n\u2022Be sure to DOUBLE CHECK any and all auto-filled information. I take no responsibility for any errors in shared class information as a result of usage of this app.\n\u2022If you find any bugs, please notify Baker either in person or at bhase@u.rochester.edu.\n\u2022You can find the source code on my GitHub, github.com/bakerhase.\n\u2022This app stores no information on your AD Credentials.\n\u2022For further usage instructions, please see "INSTRUCTIONS.PDF"')
 window.deiconify() #shows the main app window once the Read Me has been addressed
 
 

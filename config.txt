@@ -1,0 +1,6 @@
+term:Summer 2023
+
+MSM999.99:jsmith9@ur.rochester.edu
+GBA999.91b:john.doe@simon.rochester.edu
+GBA111.11:fake.name@simon.rochester.edu
+HSM000:afinch@simon.rochester.edu
