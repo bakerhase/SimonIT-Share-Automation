@@ -63,3 +63,8 @@ titled something without ‘o’ as its second character.
   o If echo ever includes ‘`’ in their URLs. This is not a generally
 accepted URL character, so I think this is unlikely, but
 possible.
+
+## Required Packages, etc.
+This app has only been tested for python 3.X, I imagine it will not work for python 2.X.
+
+This app heavily uses Selenium Webdriver
