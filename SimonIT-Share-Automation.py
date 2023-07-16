@@ -236,17 +236,24 @@ def script(uname, pwrd, urllist):
         course_type = total_coursename[0:3]
         course_number = total_coursename[3:]
     
+
     
-    
+        # Gets date from info on the sharing tab (not the same as the share button popup)
+        sharing_tab_button = driver.find_element(By.ID, "content-tab-sharing")
+        sharing_tab_button.click()
         date_elt = driver.find_element(By.ID, 'created-timestamp')
         datestring = date_elt.get_attribute('title')
         date = dateformat(datestring)
+    
         
         
         ### This entire block would be better as a function, I think, but I am not yet aware of how to pass a webdriver
         # Searches a config.txt in order to return the email of the professor
         # and assign to the professor in the "Details" tab. Requires a dictionary of professor emails to be maintained
         # each term in order to function. See comment at top of this script for notes on the format of config.txt
+        
+        # It is commented out due to changes to the ECHO site layout that make this code as-is no longer functional
+        """
         prof_email = ''
         config_file = open('config.txt', 'r')
         config_lines = config_file.readlines()
@@ -297,12 +304,11 @@ def script(uname, pwrd, urllist):
             #owner_dropdown_input.send_keys(Keys.RETURN)
             #driver.implicitly_wait(300000000)
             done_button.click()
-    
+        """
     
         #Press the 'Share' button
         share_button = driver.find_element(By.ID,'share-button')
         share_button.click()
-    
     
         #Press the 'Class' tab
         class_tab_button = driver.find_element(By.CSS_SELECTOR , "button[id*='share-tabs-tab-2']")
