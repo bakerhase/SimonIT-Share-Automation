@@ -236,12 +236,6 @@ def script(uname, pwrd, urllist):
         course_type = total_coursename[0:3]
         course_number = total_coursename[3:]
     
-    
-    
-        date_elt = driver.find_element(By.ID, 'created-timestamp')
-        datestring = date_elt.get_attribute('title')
-        date = dateformat(datestring)
-        
         
         ### This entire block would be better as a function, I think, but I am not yet aware of how to pass a webdriver
         # Searches a config.txt in order to return the email of the professor
@@ -256,13 +250,14 @@ def script(uname, pwrd, urllist):
             if total_coursename.upper() == email_line[0:colon_index]:
                 prof_email = email_line[colon_index+1:line_length-1]
         config_file.close()
+        
         # If statement checks to make sure the professor's email has been found in config and checks if "Zoom" is
         # present in the currently assigned name. These checks allow the script to continue if a) the dictionary of
         # classes has not been upkept or b) the recording has already been assigned to a professor
         
-        # Clicks to Details tab
-        details_button = driver.find_element(By.ID, 'content-tab-details')
-        details_button.click()
+        # Clicks to Permissions subtab
+        permissions_subtab_button = driver.find_element(By.XPATH, "/html/body/div[3]/div[2]/div[3]/div/div/div/div[1]/div[2]/button[5]")
+        permissions_subtab_button.click()
         
         zoom_flag = False #defaults to false just in case
         
@@ -283,7 +278,7 @@ def script(uname, pwrd, urllist):
             owner_dropdown.click()
         
             # Pass professor email into dropdown field
-            owner_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-4-input"]''')
+            owner_dropdown_input = driver.find_element(By.XPATH, '''//*[@id="react-select-2-input"]''')
             owner_dropdown_input.send_keys(prof_email)
             
             #owner_box = driver.find_element(By.CLASS_NAME, "css-1g6gooi")
@@ -299,6 +294,15 @@ def script(uname, pwrd, urllist):
             done_button.click()
     
     
+    
+        # Gets date from info on the sharing tab (not the same as the share button popup)
+        sharing_tab_button = driver.find_element(By.ID, "content-tab-sharing")
+        sharing_tab_button.click()
+        date_elt = driver.find_element(By.ID, 'created-timestamp')
+        datestring = date_elt.get_attribute('title')
+        date = dateformat(datestring)
+        
+        
         #Press the 'Share' button
         share_button = driver.find_element(By.ID,'share-button')
         share_button.click()
