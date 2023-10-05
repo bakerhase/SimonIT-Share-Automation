@@ -479,6 +479,9 @@ pwrd_entry = tk.Entry(fg='black', bg='white', show = '*', width = 50)
 URL_label = tk.Label(text = 'Start each class recording URL on a new line')
 URL_box = tk.Text() #Play with text wrapping. Is it better for no wrapping? Will that be confusing? Will having text wrapping be confusing?
 
+#UPCOMING FEATURE???
+# Makes a checkbox to have the scrip update config.txt
+#config_update_check = tk.CheckButton(window, text="Update course list?", )
 
 #Labels and creates submit button
 submit = tk.Button(text='Submit for Upload Process', command=run_script)
