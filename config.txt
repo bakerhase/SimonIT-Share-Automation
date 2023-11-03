@@ -1,5 +1,4 @@
-term:Fall 2023
-
+term:Summer 2023
 
 MSM999.99:jsmith9@ur.rochester.edu
 GBA999.91b:john.doe@simon.rochester.edu

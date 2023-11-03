@@ -1,5 +1,5 @@
 Graduate course exceptions:
 
-MSM999.99
-GBA999.91b
-HSM000
+CIS999.1
+FIN123.8
+MKT900.12

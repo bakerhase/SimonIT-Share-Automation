@@ -98,8 +98,8 @@ def titleparse(page_title):
     return course_title
 
 
-# Passed in course name, determines whether the course needs to be done the undergrad/old way
-# or if it needs to be done the grad/new way
+# Passed in course name, determines whether the course needs to be done the old way
+# or if it needs to be done the new way
 # Returns what should go in the "course" and "section" dropdowns, respectively
 def courseNameParse(total_coursename):
     except_flag = 0 # this is for whether the class counts as an exception or not
@@ -115,14 +115,14 @@ def courseNameParse(total_coursename):
     except:
         except_flag = 0
     
+    #I think with how I've defined exception course now, this block is redundant. Leaving it just in case
+    '''
     undergrad_flag = 0
     if (total_coursename[3]=='1') or (total_coursename[3] == '2') or (total_coursename[3] == '3'):
         undergrad_flag = 1
+    '''
     
-    if except_flag == 1 or undergrad_flag == 1:
-        course_type = total_coursename[0:3]
-        course_number = total_coursename[3:]
-    else:
+    if except_flag == 1:
         course_category = total_coursename[0:3]
         period_index = total_coursename.find('.')
         section_category = total_coursename[3:period_index]
@@ -135,7 +135,9 @@ def courseNameParse(total_coursename):
         
         course_type = course_category+" "+section_category
         course_number = section_number
-
+    else:
+        course_type = total_coursename[0:3]
+        course_number = total_coursename[3:]        
     return [course_type, course_number]
     
     
@@ -511,8 +513,6 @@ term = termline[termidx+1:termstop]
 # Shows a READ ME box giving info on the state of the app and some disclaimers
 tk.messagebox.showinfo(title = 'READ ME', message = 'The currently selected term is: '+term+'.\nIf this term is incorrect, please update the "term:" field in the config file.\n\nUPDATE AS OF 9/26/23\n\u2022This app now throws up error messages if there are problems with a URL.\n\u2022It uses Firefox instead of Chrome now, as God intended.\n\u2022This script now depends on "exception_courses.txt." Nothing bad will happen if the script is not present, it just may not work for all courses. See github for formatting of the file.\n\u2022Be sure to DOUBLE CHECK any and all auto-filled information. I take no responsibility for any errors in shared class information as a result of usage of this app.\n\u2022If you find any bugs, please notify Baker either in person or at bhase@u.rochester.edu.\n\u2022You can find the source code on my GitHub, github.com/bakerhase.\n\u2022This app stores no information on your AD Credentials.\n\u2022For further usage instructions, please see "INSTRUCTIONS.PDF"')
 window.deiconify() #shows the main app window once the Read Me has been addressed
-
-
 
 
 window.mainloop()
